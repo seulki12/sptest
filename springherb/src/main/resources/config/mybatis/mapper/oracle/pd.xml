@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mybatis.mapper.pd">
+	<insert id="pdInsert" parameterType="pdDTO">
+		<selectKey keyProperty="no" order="BEFORE"
+			resultType="int">
+			select pd_seq.nextval as no from dual
+		</selectKey>
+		insert into pd(no, pdname, price)
+			values(#{no} ,#{pdName}, #{price})
+	</insert>
+	
+	<select id="pdSelectAll" resultType="PdDto" >
+		select * from pd order by no desc
+	</select>
+	
+	<sql id="pdSelectCol">
+		no as no, pdname as pdName,
+		price as price, regdate as regdate
+	</sql>
+	
+	<!-- [1] -->
+	<select id="pdSelectByNo" 
+		parameterType="int" resultType="PdDto">
+		select <include refid="pdSelectCol"></include>  
+		from pd where no=#{no}
+	</select> 
+	
+	<!-- 
+	[2]
+	<resultMap type="PdDto" id="pdSelectMap">
+		<id column="no" jdbcType="BIGINT" property="no"/>
+		<result column="pdname" jdbcType="VARCHAR" 
+			property="pdName"/>
+		<result column="price" jdbcType="BIGINT" 
+			property="price"/>
+		<result column="regdate" jdbcType="TIMESTAMP" 
+			property="regdate"/>
+	</resultMap>
+	
+	<select id="pdSelectByNo" 
+		parameterType="int" resultMap="pdSelectMap">
+		select * from pd where no=#{no}
+	</select> -->
+		
+	<!-- 
+	[3] mapUnderscoreToCamelCase=true
+	
+	<select id="pdSelectByNo" 
+		parameterType="int" resultType="PdDto">
+		select * from pd where no=#{no}
+	</select> -->
+	
+	<update id="pdUpdate" parameterType="PdDto">
+		update pd
+			set pdname=#{pdName}, price=#{price}
+		where no=#{no}
+	</update>
+	
+	<delete id="pdDelete" parameterType="int">
+		delete from pd
+			where no=#{no}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+

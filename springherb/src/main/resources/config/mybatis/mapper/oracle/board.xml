@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mybatis.mapper.oracle.board">
+	<sql id="searchWhere">
+	<where>
+		<if test="searchCondition!=null and searchKeyword!=''">
+		 ${searchCondition} like '%' || #{searchKeyword} || '%'
+		</if>
+	</where>
+	</sql>
+	
+	<insert id="insertBoard" parameterType="BoardVO">
+			<selectKey order="BEFORE" keyProperty="no" resultType="int">
+				select board_seq.nextval from dual
+			</selectKey>
+			insert into board(no, name, pwd, title, email,content)
+			values(#{no},#{name},#{pwd},#{title},#{email},#{content})
+	</insert>
+	
+	<!-- <select id="selectAll" resultType="BoardVO">
+		select * from board order by no desc		
+	</select> -->
+	
+	<select id="selectAll" resultType="BoardVO" parameterType="SearchVO">
+		select * from ( select rownum as RNUM, LIST_ALL.* from (select no, name, pwd, title, email, regdate, readcount, content,
+			(sysdate-regdate)*24 as "newImgTerm" from board
+		<include refid="searchWhere"/>
+		order by no desc) LIST_ALL )
+		<![CDATA[
+		where RNUM> #{firstRecordIndex} 
+		 and RNUM<= #{firstRecordIndex}
+		 + #{recordCountPerPage}
+		]]>
+	</select>
+
+	<select id="selectTotalCount" resultType="int" parameterType="SearchVO">
+		select count(*) from board
+		<include refid="searchWhere"/>
+	</select>
+	
+	<update id="updateReadCount" parameterType="int">
+		update board set readcount=readcount+1 where no=#{no}
+	</update>
+	
+
+	
+	<select id="selectByNo" parameterType="int" resultType="BoardVO">
+		select * from board where no=#{no}
+	</select>
+	
+	<select id="checkPwd" parameterType="int" resultType="String">
+		select pwd from board where no=#{no}
+	</select>
+	
+	<update id ="updateBoard" parameterType="BoardVO">
+		update board set name=#{name}, title=#{title}, email=#{email}, content=#{content} where no=#{no}	
+	</update>
+	
+	<delete id ="deleteBoard" parameterType="int">
+		delete from board where no=#{no}
+	</delete>
+	
+</mapper>
